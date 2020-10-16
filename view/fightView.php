@@ -24,7 +24,10 @@
     </div>
     <div class="row">
         <div class="col-3"></div>
-        <div class="col-6">
+        <div class="col-6"><?php
+            if($levelUpName){?>
+                <p>GG <?= $levelUpName ?>, tu level up ! </p><?php                 
+            }?>
             <?php if($characterisDead){
                 ?><p>LOOSER !T'es mort ! </p>
                 <a href="index.php">Prêt pour un nouveau combat ?</a>
@@ -34,9 +37,7 @@
                 ?><p>WINNER ! <?= $ennemy->name() ?> est mort ! Tu regagnes 50 PV.</p>
                 <a href="index.php">Prêt pour un nouveau combat ?</a>
                 <?php
-            } ?>
+            }?>
         </div>
     </div>
-
 </div>
-

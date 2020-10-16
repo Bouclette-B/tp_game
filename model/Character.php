@@ -2,11 +2,10 @@
 class Character {
     private $_id;
     private $_name;
-    private $_healthPoints;
-
-    const ITS_ME = 1;
-    const CHARACTER_KILLED = 2;
-    const CHARACTER_HIT = 3;
+    private $_healthPoints = 100;
+    private $_level = 1;
+    private $_xp = 0;
+    private $_strength = 1;
 
     public function __construct(array $data)
     {
@@ -22,6 +21,18 @@ class Character {
         }
     }
 
+    public function level(){
+        return $this->_level;
+    }
+
+    public function xp(){
+        return $this->_xp;
+    }
+
+    public function strength(){
+        return $this->_strength;
+    }
+
     public function id(){
         return $this->_id;
     }
@@ -32,6 +43,23 @@ class Character {
 
     public function healthPoints(){
        return $this->_healthPoints;
+    }
+
+    public function setLevel($level){
+        $level = (int)$level;
+        if($level > 0){
+            $this->_level = $level;
+        }
+    }
+
+    public function setStrength($strength){
+        $strength = (int)$strength;
+        $this->_strength = $strength;
+    }
+
+    public function setXp($xp){
+        $xp = (int)$xp;
+        $this->_xp = $xp;
     }
 
     public function setId($id){
@@ -56,19 +84,27 @@ class Character {
         }
     }
 
-    public function hit(Character $targetCharacter) {
-        if($targetCharacter->id() == $this->id()){
-            return self::ITS_ME;
-        }
-        [$HP, $damage] = $targetCharacter->receiveDamage();
+    public function hit(Character $targetCharacter, $strength) {
+        [$HP, $damage] = $targetCharacter->receiveDamage($strength);
         return [$HP, $damage];
     }
 
-    public function receiveDamage() {
-        $damage = rand(0, 10);
+    public function receiveDamage($strength) {
+        $damage = rand(0, 10) + (2 * $strength);
         $this->_healthPoints -= $damage;
         $HP = $this->_healthPoints;
         return [$HP, $damage];
+    }
+
+    public function levelUp(Character $character){
+            $level = $character->level() + 1;
+            $strength = $character->strength() + 1;
+            $xp = 0;
+            $character->setLevel($level);
+            $character->setStrength($strength);
+            $character->setXp($xp);
+            $character->setHealthPoints(100);
+            return $levelUpName = $character->name();
     }
 
 }

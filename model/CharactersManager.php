@@ -16,8 +16,11 @@ class CharactersManager {
 
     public function updateCharacter(Character $character)
     {
-        $request = $this->_db->prepare('UPDATE characters SET healthPoints = :newHealthPoints WHERE id =' .$character->id());
+        $request = $this->_db->prepare('UPDATE characters SET healthPoints = :newHealthPoints, level = :level, xp = :xp,  strength = :strength WHERE id =' .$character->id());
         $request->bindValue(':newHealthPoints', $character->healthPoints(), PDO::PARAM_INT);
+        $request->bindValue(':level', $character->level(), PDO::PARAM_INT);
+        $request->bindValue(':xp', $character->xp(), PDO::PARAM_INT);
+        $request->bindValue(':strength', $character->strength(), PDO::PARAM_INT);
         $request->execute();
     }
 

@@ -3,6 +3,7 @@ session_start();
 
 require_once('./controller/BackController.php');
 require_once('./model/Manager.php');
+require_once('./model/Fight.php');
 class FrontController extends BackController
 {
     public function home() {
@@ -61,26 +62,32 @@ class FrontController extends BackController
     }
     public function fight() {
         $manager = new Manager;
+        $fight = new Fight;
         $charactersManager = new CharactersManager($manager->dbConnect());
         $storeCharacter = unserialize($_SESSION['character']);
         $character = $charactersManager->getCharacter($storeCharacter->id());
         $storeEnnemy = unserialize($_SESSION['ennemy']);
         $ennemy = $charactersManager->getCharacter($storeEnnemy->id());
-        $characterisDead = false;
-        $ennemyIsDead = false;
-        [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy);
-        [$HPCharacter, $damageCharacter] = $ennemy->hit($character);
+        $whoIsDead = false;
+        $levelUpName = null;
+        $XPCharacter = $character->xp();
+        $XPEnnemy = $ennemy->xp();
+        [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character->strength());
+        [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy->strength());
         if($ennemy->healthPoints() == 0 && $character->healthPoints() == 0){
             $charactersManager->deleteCharacter($character);
             $charactersManager->deleteCharacter($ennemy);
         }elseif($character->healthPoints() <= 0){
-            $characterisDead = true;
+            $whoIsDead = $fight->winFight($ennemy, $HPEnnemy, $XPEnnemy);
             $charactersManager->deleteCharacter($character);
         } elseif($ennemy->healthPoints() <= 0){
-            $ennemyIsDead = true;
-            $HPCharacter = (int)$HPCharacter + 50;
-            $character->setHealthPoints($HPCharacter);
+            $whoIsDead = $fight->winFight($character, $HPCharacter, $XPCharacter);
             $charactersManager->deleteCharacter($ennemy);
+        }
+        if($character->xp() == 100){
+            $levelUpName = $character->levelUp($character);
+        }elseif($ennemy->xp() == 100) {
+            $levelUpName = $ennemy->levelUp($ennemy);
         }
         $charactersManager->updateCharacter($ennemy);
         $charactersManager->updateCharacter($character);
@@ -92,8 +99,8 @@ class FrontController extends BackController
             'ennemy' => $ennemy,
             'HPCharacter' => $HPCharacter,
             'damageCharacter' => $damageCharacter,
-            'characterisDead' => $characterisDead,
-            'ennemyIsDead' => $ennemyIsDead
+            'levelUpName' => $levelUpName,
+            'whoIsDead' => $whoIsDead
 
         ];
         $this->render('fightView', $viewData);
