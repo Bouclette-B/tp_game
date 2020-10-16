@@ -49,28 +49,26 @@ class Character {
 
     public function setHealthPoints($healthPoints){
         $healthPoints = (int)$healthPoints;
-        if($healthPoints <= 100 && $healthPoints > 0){
+        if($healthPoints >= 100){
+            $this->_healthPoints = 100;
+        }elseif($healthPoints <= 100 && $healthPoints > 0){
             $this->_healthPoints = $healthPoints;
         }
     }
 
-    public function hit(Character $targetCharacter, $attackerName, $targetName) {
+    public function hit(Character $targetCharacter) {
         if($targetCharacter->id() == $this->id()){
             return self::ITS_ME;
         }
-        return $targetCharacter->receiveDamage($attackerName, $targetName);
+        [$HP, $damage] = $targetCharacter->receiveDamage();
+        return [$HP, $damage];
     }
 
-    public function receiveDamage($attackerName, $targetName) {
+    public function receiveDamage() {
         $damage = rand(0, 10);
         $this->_healthPoints -= $damage;
-        if($this->_healthPoints <= 0){
-            return self::CHARACTER_KILLED;
-        } else {
-            $HP = $this->_healthPoints;
-            echo '<p>' . $attackerName . ' inflige ' . $damage . ' points de dégâts à ' . $targetName . '. Il reste ' . $HP . ' points de vie à ' . $targetName .'.</p>';
-            return self::CHARACTER_HIT;
-        }
+        $HP = $this->_healthPoints;
+        return [$HP, $damage];
     }
 
 }

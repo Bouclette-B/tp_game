@@ -82,4 +82,8 @@ class CharactersManager {
         $request->execute([':id' => $id]);
         return $request->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function storeCharacterInSession($sessionName, Character $character){
+        $_SESSION[$sessionName] = serialize($character);
+    }
 }

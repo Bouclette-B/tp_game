@@ -74,7 +74,7 @@
                 <p>Il a <strong><?= $chosenCharacter->healthPoints() ?></strong> PV.</p>
                 <p>Votre ennemi est : <strong><?= $chosenEnnemy->name() ?></strong>.</p>
                 <p>Il a <strong><?= $chosenEnnemy->healthPoints() ?></strong>.</p>
-                <a href="./view/fightView.php?action=fight">FIGHT !</a>
+                <a href="./index.php?action=fight">FIGHT !</a>
                 <?php
             }elseif($errorMsg){ ?>
                 <p><?= $errorMsg ?></p><?php
