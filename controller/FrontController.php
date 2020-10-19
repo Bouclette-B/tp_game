@@ -16,13 +16,16 @@ class FrontController extends BackController
         $chosenEnnemy = null;
         $errorMsg = null;
         $randomEnnemy = $this->isPost('randomEnnemy');
+        $typeOfCharacter = $this->isPost('typeOfCharacter');
         $existingEnnemy = $this->isPost('existingEnnemy');
         $charactersManager = new CharactersManager($manager->dbConnect());
         if($newCharacterName && $newCharacterName != "") {
             $newCharacterName = htmlspecialchars($newCharacterName);
             $characterAlreadyExists = $charactersManager->checkCharacterExistence($newCharacterName);
             if(!$characterAlreadyExists){
-                $newCharacter = new Character(['name' => $newCharacterName]);
+                $newCharacter = new Character([
+                    'name' => $newCharacterName,
+                    'type' =>$typeOfCharacter]);
                 $charactersManager->addCharacter($newCharacter);
                 $chosenCharacter = $charactersManager->getCharacter($newCharacterName);
                 $charactersManager->storeCharacterInSession('character', $chosenCharacter);
@@ -52,11 +55,11 @@ class FrontController extends BackController
                 $charactersManager->storeCharacterInSession('ennemy', $chosenEnnemy);
             }        
         }
+
         $characters = $charactersManager->getList();
         $viewData = [
             'chosenCharacter' => $chosenCharacter,
             'characters' => $characters,
-            'newCharacterName' => $newCharacterName,
             'chosenEnnemy' => $chosenEnnemy,
             'errorMsg' => $errorMsg
         ];

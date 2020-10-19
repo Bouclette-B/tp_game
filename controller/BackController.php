@@ -4,8 +4,6 @@ class BackController {
     public function isPost($data=NULL) {
         if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST[$data])){
             return $_POST[$data];
-        } elseif($_SERVER['REQUEST_METHOD'] === 'POST'){
-            return true;
         }
         return false;
     }
@@ -17,5 +15,4 @@ class BackController {
         $content = ob_get_clean(); 
         require('./template/template.php');
     }
-
 }

@@ -11,8 +11,9 @@ class CharactersManager {
 
     public function addCharacter(Character $newCharacter)
     {
-        $characterInfo = $this->_db->prepare('INSERT INTO characters (name) VALUES(:name)');
+        $characterInfo = $this->_db->prepare('INSERT INTO characters (name, type) VALUES(:name, :type)');
         $characterInfo->bindValue(':name', $newCharacter->name());
+        $characterInfo->bindValue(':type', $newCharacter->type());
         $characterInfo->execute();
     }
 
@@ -35,13 +36,13 @@ class CharactersManager {
     public function getCharacter($info)
     {
         if(is_int($info)){
-        $request = $this->_db->query('SELECT * FROM characters WHERE id =' .$info);
-        $data = $request->fetch(PDO::FETCH_ASSOC);
+            $request = $this->_db->query('SELECT * FROM characters WHERE id =' .$info);
+            $data = $request->fetch(PDO::FETCH_ASSOC);
         return new Character($data);
         } else {
-        $request = $this->_db->prepare('SELECT * FROM characters WHERE name = :name');
-        $request->execute([':name' => $info]);
-        $data = $request->fetch(PDO::FETCH_ASSOC);
+            $request = $this->_db->prepare('SELECT * FROM characters WHERE name = :name');
+            $request->execute([':name' => $info]);
+            $data = $request->fetch(PDO::FETCH_ASSOC);
         return new Character($data);
         }
     }

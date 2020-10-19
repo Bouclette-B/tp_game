@@ -7,6 +7,8 @@ class Character {
     private $_level = 1;
     private $_xp = 0;
     private $_strength = 1;
+    private $_type;
+    private $_asset = 1;
 
     public function __construct(array $data)
     {
@@ -20,6 +22,14 @@ class Character {
                 $this->$method($value);
             }
         }
+    }
+
+    public function type(){
+        return $this->_type;
+    }
+
+    public function asset(){
+        return $this->_asset;
     }
 
     public function level(){
@@ -44,6 +54,17 @@ class Character {
 
     public function healthPoints(){
        return $this->_healthPoints;
+    }
+
+    public function setType($type){
+        $this->_type = $type;
+    }
+
+    public function setAsset($asset){
+        $asset = (int)$asset;
+        if($asset > 0){
+            $this->_asset = $asset;
+        }
     }
 
     public function setLevel($level){
