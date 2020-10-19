@@ -1,4 +1,5 @@
 <?php
+namespace App\model;
 class Character {
     private $_id;
     private $_name;

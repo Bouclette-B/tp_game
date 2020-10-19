@@ -28,12 +28,12 @@
             if($levelUpName){?>
                 <p>GG <?= $levelUpName ?>, tu level up ! </p><?php                 
             }?>
-            <?php if($characterisDead){
+            <?php if($userLose){
                 ?><p>LOOSER !T'es mort ! </p>
                 <a href="index.php">Prêt pour un nouveau combat ?</a>
                 <?php
             }
-            if($ennemyIsDead){
+            if($userWin){
                 ?><p>WINNER ! <?= $ennemy->name() ?> est mort ! Tu regagnes 50 PV.</p>
                 <a href="index.php">Prêt pour un nouveau combat ?</a>
                 <?php

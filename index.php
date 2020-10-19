@@ -1,9 +1,7 @@
 <?php
-function loadClass($class){
-    require './model/' . $class . '.php';
-}
-spl_autoload_register('loadClass');
-require('./controller/FrontController.php');
+require_once('autoload.php');
+use App\controller\FrontController;
+
 $frontController = new FrontController;
 
 $action = (isset($_GET['action'])) ? $_GET['action'] : NULL;

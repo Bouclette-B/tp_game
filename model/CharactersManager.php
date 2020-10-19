@@ -1,4 +1,6 @@
 <?php
+namespace App\model;
+use \PDO;
 class CharactersManager {
     private $_db;
 

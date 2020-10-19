@@ -1,9 +1,11 @@
 <?php
+namespace App\controller;
+use App\model\Manager;
+use App\model\CharactersManager;
+use App\model\Character;
+use App\model\Fight;
 session_start();
 
-require_once('./controller/BackController.php');
-require_once('./model/Manager.php');
-require_once('./model/Fight.php');
 class FrontController extends BackController
 {
     public function home() {
@@ -68,8 +70,9 @@ class FrontController extends BackController
         $character = $charactersManager->getCharacter($storeCharacter->id());
         $storeEnnemy = unserialize($_SESSION['ennemy']);
         $ennemy = $charactersManager->getCharacter($storeEnnemy->id());
-        $whoIsDead = false;
         $levelUpName = null;
+        $userLose  = false;
+        $userWin = false;
         $XPCharacter = $character->xp();
         $XPEnnemy = $ennemy->xp();
         [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character->strength());
@@ -78,10 +81,12 @@ class FrontController extends BackController
             $charactersManager->deleteCharacter($character);
             $charactersManager->deleteCharacter($ennemy);
         }elseif($character->healthPoints() <= 0){
-            $whoIsDead = $fight->winFight($ennemy, $HPEnnemy, $XPEnnemy);
+            $fight->winFight($ennemy, $HPEnnemy, $XPEnnemy);
+            $userLose = true;
             $charactersManager->deleteCharacter($character);
         } elseif($ennemy->healthPoints() <= 0){
-            $whoIsDead = $fight->winFight($character, $HPCharacter, $XPCharacter);
+            $fight->winFight($character, $HPCharacter, $XPCharacter);
+            $userWin = true;
             $charactersManager->deleteCharacter($ennemy);
         }
         if($character->xp() == 100){
@@ -100,8 +105,8 @@ class FrontController extends BackController
             'HPCharacter' => $HPCharacter,
             'damageCharacter' => $damageCharacter,
             'levelUpName' => $levelUpName,
-            'whoIsDead' => $whoIsDead
-
+            'userLose' => $userLose,
+            'userWin' => $userWin
         ];
         $this->render('fightView', $viewData);
     }
