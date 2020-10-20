@@ -1,6 +1,6 @@
 <?php
 namespace App\model;
-class Character {
+abstract class Character {
     private $_id;
     private $_name;
     private $_healthPoints = 100;
@@ -9,10 +9,20 @@ class Character {
     private $_strength = 1;
     private $_type;
     private $_asset = 1;
+    private $_bonus = "";
+    private $_malus = [
+        'freeze' => [
+            'sentence' => "",
+            'remainingRounds' => 0
+        ],
+        'criticalHit' => ""
+        
+    ];
 
-    public function __construct(array $data)
+    public function __construct(array $data, $type)
     {
         $this->hydrate($data);
+        $this->setType($type);
     }
 
     public function hydrate(array $data){
@@ -22,6 +32,14 @@ class Character {
                 $this->$method($value);
             }
         }
+    }
+    
+    public function malus(){
+        return $this->_malus;
+    }
+
+    public function bonus(){
+        return $this->_bonus;
     }
 
     public function type(){
@@ -54,6 +72,27 @@ class Character {
 
     public function healthPoints(){
        return $this->_healthPoints;
+    }
+
+    // public function setMalus($malus){
+    //     if(is_string($malus)){
+    //         $this->_malus = $malus;
+    //     }
+    // }
+
+    public function setFreeze(){
+        $this->_malus['freeze']['sentence'] = "Freeze ! Impossible d'attaquer au prochain tour.";
+        $this->_malus['freeze']['remainingRounds'] = 1;
+        }
+
+    public function setCriticalHit(){
+        $this->_malus['criticalHit'] = "Coup critique ! Dégâts doublés !";
+    }
+
+    public function setBonus($bonus){
+        if(is_string($bonus)){
+            $this->_bonus = $bonus;
+        }
     }
 
     public function setType($type){
@@ -107,12 +146,20 @@ class Character {
     }
 
     public function hit(Character $targetCharacter, $strength) {
-        [$HP, $damage] = $targetCharacter->receiveDamage($strength);
-        return [$HP, $damage];
+        return $targetCharacter->receiveDamage($strength, $targetCharacter);
     }
 
-    public function receiveDamage($strength) {
-        $damage = rand(0, 10) + (2 * $strength);
+    public function receiveDamage($damage, $targetCharacter) {
+        $malus = $targetCharacter->malus();
+        if($malus['criticalHit'] != ""){
+            $damage = $damage*2;
+        }
+        if($malus['freeze']['remainingRounds'] != 0){
+            $malus['freeze']['remainingRounds'] -= 1;
+            $HP = $this->_healthPoints;
+            $damage = 0;
+            return [$HP, $damage];
+            }
         $this->_healthPoints -= $damage;
         $HP = $this->_healthPoints;
         return [$HP, $damage];
@@ -127,6 +174,24 @@ class Character {
             $character->setXp($xp);
             $character->setHealthPoints(100);
             return $levelUpName = $character->name();
+    }
+
+    public function getCharacterClass(Character $character){
+        $className = $character->type();
+        if($className == "warrior"){
+            $characterClass = "Guerrier";
+        }elseif($className == "wizard"){
+            $characterClass = "Sorcier";
+        }
+        return $characterClass;
+    }
+
+    public function resetBonus(){
+        $this->_bonus = "";
+    }
+
+    public function resetMalus(){
+        $this->_malus['criticalHit'] = "";
     }
 
 }

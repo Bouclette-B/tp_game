@@ -38,12 +38,14 @@ class CharactersManager {
         if(is_int($info)){
             $request = $this->_db->query('SELECT * FROM characters WHERE id =' .$info);
             $data = $request->fetch(PDO::FETCH_ASSOC);
-        return new Character($data);
+            $typeOfCharacter = "App\\model\\charactersClass\\" . ucfirst($data['type']);
+        return new $typeOfCharacter($data);
         } else {
             $request = $this->_db->prepare('SELECT * FROM characters WHERE name = :name');
             $request->execute([':name' => $info]);
             $data = $request->fetch(PDO::FETCH_ASSOC);
-        return new Character($data);
+            $typeOfCharacter  = "App\\model\\charactersClass\\" . ucfirst($data['type']);
+        return new $typeOfCharacter($data);
         }
     }
 
@@ -75,7 +77,8 @@ class CharactersManager {
             $request->execute([':name' => $name]);
             $charactersList = $request->fetchAll(PDO::FETCH_ASSOC);
             foreach($charactersList as $characterInfo){
-                $characters[] = new Character($characterInfo);
+                $typeOfCharacter = $characterInfo['type'];
+                $characters[] = new $typeOfCharacter($characterInfo);
             }
             return $characters;
         }

@@ -58,7 +58,7 @@
         <div class="row">
             <div class="col-3"></div>
             <div class="form-check col-6">
-                <input type="checkbox" class="randomEnnemy">
+                <input type="checkbox" class="randomEnnemy" name="randomEnnemy" value="randomEnnemy">
                 <label class="form-check-label" for="randomEnnemy">Ennemi aléatoire</label> 
             </div>
             <div class="col-3"></div>
@@ -82,7 +82,7 @@
                 <p>Il a <strong><?= $chosenEnnemy->healthPoints() ?></strong>.</p>
                 <a href="./index.php?action=fight">FIGHT !</a>
                 <?php
-            }elseif($errorMsg){ ?>
+            }else{ ?>
                 <p><?= $errorMsg ?></p><?php
             } ?>
         </div>

@@ -2,7 +2,7 @@
 namespace App\controller;
 use App\model\Manager;
 use App\model\CharactersManager;
-use App\model\Character;
+use App\model\charactersClass\Wizard;
 use App\model\Fight;
 session_start();
 
@@ -23,9 +23,8 @@ class FrontController extends BackController
             $newCharacterName = htmlspecialchars($newCharacterName);
             $characterAlreadyExists = $charactersManager->checkCharacterExistence($newCharacterName);
             if(!$characterAlreadyExists){
-                $newCharacter = new Character([
-                    'name' => $newCharacterName,
-                    'type' =>$typeOfCharacter]);
+                $classPath = "App\\model\\charactersClass\\" . ucfirst($typeOfCharacter);
+                $newCharacter = new $classPath (['name' => $newCharacterName,]);
                 $charactersManager->addCharacter($newCharacter);
                 $chosenCharacter = $charactersManager->getCharacter($newCharacterName);
                 $charactersManager->storeCharacterInSession('character', $chosenCharacter);
@@ -46,7 +45,7 @@ class FrontController extends BackController
                 $randomId = array_rand($ids, 1);
                 $chosenEnnemy = $charactersManager->getCharacter((int)$randomId);
                 $charactersManager->storeCharacterInSession('ennemy', $chosenEnnemy);
-        } elseif($existingEnnemy){
+        } elseif($existingEnnemy && $existingEnnemy != "Choisissez..."){
             if($existingEnnemy == $chosenCharacter->id()){
                 $errorMsg = "Tu ne peux pas te battre contre toi-même !";
             } else {
@@ -54,6 +53,12 @@ class FrontController extends BackController
                 $chosenEnnemy = $charactersManager->getCharacter($ennemyId);
                 $charactersManager->storeCharacterInSession('ennemy', $chosenEnnemy);
             }        
+        }
+
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            if($existingEnnemy =='Choisissez...' && !$randomEnnemy){
+                $errorMsg = "T'as oublié de choisir un ennemi !";
+            }
         }
 
         $characters = $charactersManager->getList();
@@ -69,17 +74,29 @@ class FrontController extends BackController
         $manager = new Manager;
         $fight = new Fight;
         $charactersManager = new CharactersManager($manager->dbConnect());
-        $storeCharacter = unserialize($_SESSION['character']);
-        $character = $charactersManager->getCharacter($storeCharacter->id());
-        $storeEnnemy = unserialize($_SESSION['ennemy']);
-        $ennemy = $charactersManager->getCharacter($storeEnnemy->id());
+        $character = unserialize($_SESSION['character']);
+        $ennemy = unserialize($_SESSION['ennemy']);
+        $character->resetBonus();
+        $ennemy->resetBonus();
+        $character->resetMalus('criticalHit');
         $levelUpName = null;
         $userLose  = false;
         $userWin = false;
         $XPCharacter = $character->xp();
         $XPEnnemy = $ennemy->xp();
-        [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character->strength());
-        [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy->strength());
+        $ennemyClass = $ennemy->getCharacterClass($ennemy);
+        $characterClass = $character->getCharacterClass($character);
+        if($ennemyClass == "Guerrier"){
+            [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character->strength());    
+        } else {
+            [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character->strength());
+        }
+        if($characterClass == "Guerrier"){
+            [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy->strength());
+        }else{
+            [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy->strength());
+        }
+
         if($ennemy->healthPoints() == 0 && $character->healthPoints() == 0){
             $charactersManager->deleteCharacter($character);
             $charactersManager->deleteCharacter($ennemy);
@@ -92,13 +109,20 @@ class FrontController extends BackController
             $userWin = true;
             $charactersManager->deleteCharacter($ennemy);
         }
+
         if($character->xp() == 100){
             $levelUpName = $character->levelUp($character);
         }elseif($ennemy->xp() == 100) {
             $levelUpName = $ennemy->levelUp($ennemy);
         }
-        $charactersManager->updateCharacter($ennemy);
-        $charactersManager->updateCharacter($character);
+
+        $charactersManager->storeCharacterInSession('character', $character);
+        $charactersManager->storeCharacterInSession('ennemy', $ennemy);
+
+        if($userWin || $userLose){
+            $charactersManager->updateCharacter($ennemy);
+            $charactersManager->updateCharacter($character);
+        }
 
         $viewData = [
             'HPEnnemy' => $HPEnnemy,
@@ -109,7 +133,9 @@ class FrontController extends BackController
             'damageCharacter' => $damageCharacter,
             'levelUpName' => $levelUpName,
             'userLose' => $userLose,
-            'userWin' => $userWin
+            'userWin' => $userWin,
+            'ennemyClass' => $ennemyClass,
+            'characterClass' => $characterClass,
         ];
         $this->render('fightView', $viewData);
     }

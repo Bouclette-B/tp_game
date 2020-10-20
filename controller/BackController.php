@@ -1,7 +1,7 @@
 <?php
 namespace App\controller;
 class BackController {
-    public function isPost($data=NULL) {
+    public function isPost($data) {
         if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST[$data])){
             return $_POST[$data];
         }
