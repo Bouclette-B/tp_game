@@ -14,10 +14,9 @@
                     <p><strong><?= $character->name() ?>, <?= $characterClass ?></strong></p>
                     <p>Dégâts reçus : <strong><?= $damageCharacter ?></strong>.</p>
                     <p>Il te reste <strong><?= $HPCharacter ?></strong> PV.</p>
-                    <p><em><?= $character->bonus() ?></em></p><?php
-                    foreach ($character->malus() as $malus){ ?>
-                        <p<em><?= $malus ?></em></p><?php
-                    }
+                    <p><em><?= $character->bonus() ?></em></p>
+                    <p><em><?= $character->getCriticalHit() ?></em></p>
+                    <p><em><?= $character->getFreeze() ?></em></p><?php 
                     if($levelUpName == $character->name()){?>
                         <p>GG <?= $levelUpName ?>, tu level up ! </p><?php                 
                     }?>        
@@ -26,10 +25,10 @@
                     <p><strong><?= $ennemy->name() ?>, <?= $ennemyClass ?></strong></p>
                     <p>Dégâts reçus : <strong><?= $damageEnnemy ?></strong>.</p>
                     <p>Il reste <strong><?= $HPEnnemy ?></strong> PV à ton ennemi.</p>
-                    <p><em><?= $ennemy->bonus() ?></em></p><?php
-                    foreach ($ennemy->malus() as $malus){ ?>
-                        <p<em><?= $malus ?></em></p><?php
-                    }
+                    <p><em><?= $ennemy->bonus() ?></em></p>
+                    <p><em><?= $ennemy->bonus() ?></em></p>
+                    <p><em><?= $ennemy->getCriticalHit() ?></em></p>
+                    <p><em><?= $ennemy->getFreeze() ?></em></p><?php
                     if($levelUpName == $ennemy->name()){?>
                         <p><em>Double peine, ton adversaire level up ! Bouuuuh </em></p><?php                 
                     }?>        

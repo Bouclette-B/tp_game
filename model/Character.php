@@ -74,14 +74,16 @@ abstract class Character {
        return $this->_healthPoints;
     }
 
-    // public function setMalus($malus){
-    //     if(is_string($malus)){
-    //         $this->_malus = $malus;
-    //     }
-    // }
+    public function getCriticalHit(){
+        return $this->_malus['criticalHit'];
+    }
+
+    public function getFreeze(){
+        return $this->_malus['freeze']['sentence'];
+    }
 
     public function setFreeze(){
-        $this->_malus['freeze']['sentence'] = "Freeze ! Impossible d'attaquer au prochain tour.";
+        $this->_malus['freeze']['sentence'] = "Freeze ! Impossible d'attaquer au prochain tour !";
         $this->_malus['freeze']['remainingRounds'] = 1;
         }
 
@@ -145,6 +147,11 @@ abstract class Character {
         }
     }
 
+    public function stopFreeze(){
+            $this->_malus['freeze']['sentence'] = "";
+            $this->_malus['freeze']['remainingRounds'] = 0;
+    }
+
     public function hit(Character $targetCharacter, $strength) {
         return $targetCharacter->receiveDamage($strength, $targetCharacter);
     }
@@ -156,6 +163,9 @@ abstract class Character {
         }
         if($malus['freeze']['remainingRounds'] != 0){
             $malus['freeze']['remainingRounds'] -= 1;
+            if($malus['freeze']['remainingRounds'] == 0){
+                $targetCharacter->stopFreeze();
+            }
             $HP = $this->_healthPoints;
             $damage = 0;
             return [$HP, $damage];

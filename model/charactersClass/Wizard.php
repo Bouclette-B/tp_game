@@ -14,9 +14,8 @@ class Wizard extends Character{
     }
 
     public function freeze(){
-        //$result = rand(1,5);
-        $result = 5;
-        if($result == 5){
+        $result = rand(1,4);
+        if($result == 4){
             return true;
         }
         return false;
