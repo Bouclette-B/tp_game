@@ -82,9 +82,9 @@ abstract class Character {
         return $this->_malus['freeze']['sentence'];
     }
 
-    public function setFreeze(){
+    public function setFreeze($rounds){
         $this->_malus['freeze']['sentence'] = "Freeze ! Impossible d'attaquer au prochain tour !";
-        $this->_malus['freeze']['remainingRounds'] = 1;
+        $this->_malus['freeze']['remainingRounds'] = $rounds;
         }
 
     public function setCriticalHit(){
@@ -152,7 +152,18 @@ abstract class Character {
             $this->_malus['freeze']['remainingRounds'] = 0;
     }
 
-    public function hit(Character $targetCharacter, $strength) {
+    public function hit(Character $targetCharacter, Character $attackingCharacter, $strength) {
+        $malus = $attackingCharacter->malus();
+        $rounds = $malus['freeze']['remainingRounds'];
+        if($rounds != 0){
+            $rounds -= 1;
+            $HP = $targetCharacter->healthPoints();
+            $damage = 0;
+            $attackingCharacter->setFreeze($rounds);
+            return [$HP, $damage];
+        }elseif($rounds == 0){
+                $attackingCharacter->stopFreeze();
+        }
         return $targetCharacter->receiveDamage($strength, $targetCharacter);
     }
 
@@ -161,28 +172,21 @@ abstract class Character {
         if($malus['criticalHit'] != ""){
             $damage = $damage*2;
         }
-        if($malus['freeze']['remainingRounds'] != 0){
-            $malus['freeze']['remainingRounds'] -= 1;
-            if($malus['freeze']['remainingRounds'] == 0){
-                $targetCharacter->stopFreeze();
-            }
-            $HP = $this->_healthPoints;
-            $damage = 0;
-            return [$HP, $damage];
-            }
-        $this->_healthPoints -= $damage;
-        $HP = $this->_healthPoints;
+        $targetCharacter->_healthPoints -= $damage;
+        $HP = $targetCharacter->_healthPoints;
         return [$HP, $damage];
     }
 
     public function levelUp(Character $character){
             $level = $character->level() + 1;
             $strength = $character->strength() + 1;
+            $asset = $character->asset() + 1;
             $xp = 0;
             $character->setLevel($level);
             $character->setStrength($strength);
             $character->setXp($xp);
             $character->setHealthPoints(100);
+            $character->setAsset($asset);
             return $levelUpName = $character->name();
     }
 
@@ -204,4 +208,4 @@ abstract class Character {
         $this->_malus['criticalHit'] = "";
     }
 
-}
+}   

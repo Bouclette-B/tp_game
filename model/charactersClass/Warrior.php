@@ -22,8 +22,8 @@ class Warrior extends Character{
         $asset = $this->asset();
         if($avoidDamageSuccess){
             $damage = (rand(0, 10) + (2*$strength));
-            $damage -= ($asset*2);
-            $bonus = "Attaque parée ! Moins - 2 de dégats subis.";
+            $damage -= $asset;
+            $bonus = "Attaque parée ! Moins " . $asset .  " de dégats subis.";
             $targetCharacter->setBonus($bonus);
         }else{
             $damage = rand(0, 10) + (2 * $strength);
@@ -40,12 +40,12 @@ class Warrior extends Character{
         return false;
     }
 
-    public function hit(Character $targetCharacter, $strength){
+    public function hit(Character $targetCharacter, Character $attackingCharacter, $strength){
         $criticalHit = $this->criticalHit();
         if($criticalHit){
             $targetCharacter->setCriticalHit();
         }
-        [$HP, $damage] = parent::hit($targetCharacter, $strength);
+        [$HP, $damage] = parent::hit($targetCharacter, $attackingCharacter, $strength);
         return [$HP, $damage];
     }
 

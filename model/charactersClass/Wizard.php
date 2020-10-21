@@ -21,12 +21,12 @@ class Wizard extends Character{
         return false;
     }
 
-    public function hit(Character $targetCharacter, $strength){
-        $freeze = $this->freeze();
+    public function hit(Character $targetCharacter, Character $attackingCharacter, $strength){
+        $freeze = $attackingCharacter->freeze();
         if($freeze){
-            $targetCharacter->setFreeze();
+            $targetCharacter->setFreeze(2);
         }
-        [$HP, $damage] = parent::hit($targetCharacter, $strength);
+        [$HP, $damage] = parent::hit($targetCharacter, $attackingCharacter, $strength);
         return [$HP, $damage];
     }
 

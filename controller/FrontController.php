@@ -87,14 +87,14 @@ class FrontController extends BackController
         $ennemyClass = $ennemy->getCharacterClass($ennemy);
         $characterClass = $character->getCharacterClass($character);
         if($ennemyClass == "Guerrier"){
-            [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character->strength());    
+            [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character, $character->strength());    
         } else {
-            [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character->strength());
+            [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character, $character->strength());
         }
         if($characterClass == "Guerrier"){
-            [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy->strength());
+            [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy, $ennemy->strength());
         }else{
-            [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy->strength());
+            [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy, $ennemy->strength());
         }
 
         if($ennemy->healthPoints() == 0 && $character->healthPoints() == 0){

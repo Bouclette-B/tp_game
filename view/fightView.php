@@ -26,7 +26,6 @@
                     <p>Dégâts reçus : <strong><?= $damageEnnemy ?></strong>.</p>
                     <p>Il reste <strong><?= $HPEnnemy ?></strong> PV à ton ennemi.</p>
                     <p><em><?= $ennemy->bonus() ?></em></p>
-                    <p><em><?= $ennemy->bonus() ?></em></p>
                     <p><em><?= $ennemy->getCriticalHit() ?></em></p>
                     <p><em><?= $ennemy->getFreeze() ?></em></p><?php
                     if($levelUpName == $ennemy->name()){?>
