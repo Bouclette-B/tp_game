@@ -74,11 +74,14 @@ class FrontController extends BackController
         $manager = new Manager;
         $fight = new Fight;
         $charactersManager = new CharactersManager($manager->dbConnect());
+        $fleeSelected = $this->isPost("flee");
+        $fleeMsg = null;
         $character = unserialize($_SESSION['character']);
         $ennemy = unserialize($_SESSION['ennemy']);
         $character->resetBonus();
         $ennemy->resetBonus();
         $character->resetMalus('criticalHit');
+        $ennemy->resetMalus('criticalHit');
         $levelUpName = null;
         $userLose  = false;
         $userWin = false;
@@ -86,42 +89,56 @@ class FrontController extends BackController
         $XPEnnemy = $ennemy->xp();
         $ennemyClass = $ennemy->getCharacterClass($ennemy);
         $characterClass = $character->getCharacterClass($character);
-        if($ennemyClass == "Guerrier"){
-            [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character, $character->strength());    
-        } else {
-            [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character, $character->strength());
-        }
-        if($characterClass == "Guerrier"){
-            [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy, $ennemy->strength());
+
+        if($fleeSelected){
+            $fleeSuccess = $character->flee($character, $ennemy);
+            if(!$fleeSuccess){
+                if($characterClass == "Guerrier"){
+                    [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy);
+                }else{
+                    [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy);
+                }        
+            }else{
+                $fleeMsg = "Fuite réussie, fin du combat.";
+                $fight->fleeFight($character, $ennemy);
+                $fight->endFight($character, $ennemy, $levelUpName, $charactersManager);
+                $charactersManager->updateCharacter($ennemy);
+                $charactersManager->updateCharacter($character);
+                header('Location: index.php');
+            }
         }else{
-            [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy, $ennemy->strength());
-        }
+            if($ennemyClass == "Guerrier"){
+                [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character);    
+            } else {
+                [$HPEnnemy, $damageEnnemy] = $character->hit($ennemy, $character);
+            }
 
-        if($ennemy->healthPoints() == 0 && $character->healthPoints() == 0){
-            $charactersManager->deleteCharacter($character);
-            $charactersManager->deleteCharacter($ennemy);
-        }elseif($character->healthPoints() <= 0){
-            $fight->winFight($ennemy, $HPEnnemy, $XPEnnemy);
-            $userLose = true;
-            $charactersManager->deleteCharacter($character);
-        } elseif($ennemy->healthPoints() <= 0){
-            $fight->winFight($character, $HPCharacter, $XPCharacter);
-            $userWin = true;
-            $charactersManager->deleteCharacter($ennemy);
-        }
+            if($characterClass == "Guerrier"){
+                [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy);
+            }else{
+                [$HPCharacter, $damageCharacter] = $ennemy->hit($character, $ennemy);
+            }
 
-        if($character->xp() == 100){
-            $levelUpName = $character->levelUp($character);
-        }elseif($ennemy->xp() == 100) {
-            $levelUpName = $ennemy->levelUp($ennemy);
-        }
+            if($ennemy->healthPoints() == 0 && $character->healthPoints() == 0){
+                $charactersManager->deleteCharacter($character);
+                $charactersManager->deleteCharacter($ennemy);
+            }elseif($character->healthPoints() <= 0){
+                $fight->winFight($ennemy, $HPEnnemy, $XPEnnemy);
+                $userLose = true;
+                $charactersManager->deleteCharacter($character);
+            } elseif($ennemy->healthPoints() <= 0){
+                $fight->winFight($character, $HPCharacter, $XPCharacter);
+                $userWin = true;
+                $charactersManager->deleteCharacter($ennemy);
+            }
 
-        $charactersManager->storeCharacterInSession('character', $character);
-        $charactersManager->storeCharacterInSession('ennemy', $ennemy);
+            if($userWin || $userLose){
+                $charactersManager->updateCharacter($ennemy);
+                $charactersManager->updateCharacter($character);
+            }
 
-        if($userWin || $userLose){
-            $charactersManager->updateCharacter($ennemy);
-            $charactersManager->updateCharacter($character);
+            $charactersManager->storeCharacterInSession('character', $character);
+            $charactersManager->storeCharacterInSession('ennemy', $ennemy);    
         }
 
         $viewData = [
@@ -136,6 +153,7 @@ class FrontController extends BackController
             'userWin' => $userWin,
             'ennemyClass' => $ennemyClass,
             'characterClass' => $characterClass,
+            'fleeMsg' => $fleeMsg
         ];
         $this->render('fightView', $viewData);
     }

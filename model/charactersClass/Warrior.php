@@ -1,7 +1,6 @@
 <?php
 namespace App\model\charactersClass;
 use App\model\Character;
-use App\model\CharactersManager;
 
 class Warrior extends Character{
     public function __construct($data){
@@ -17,22 +16,18 @@ class Warrior extends Character{
         }
     }
 
-    public function receiveDamage($strength, $targetCharacter){
-        $avoidDamageSuccess = $this->avoidDamage();
+    public function calculDamage(Character $attackingCharacter) : int {
+        $damage = parent::calculDamage($attackingCharacter);
         $asset = $this->asset();
-        if($avoidDamageSuccess){
-            $damage = (rand(0, 10) + (2*$strength));
+        if($this->avoidDamage()){
             $damage -= $asset;
-            $bonus = "Attaque parée ! Moins " . $asset .  " de dégats subis.";
-            $targetCharacter->setBonus($bonus);
-        }else{
-            $damage = rand(0, 10) + (2 * $strength);
+            $bonus = "Attaque parée ! Moins {$asset} de dégats subis.";
+            $this->setBonus($bonus);
         }
-        [$HP, $damage] = parent::receiveDamage($damage, $targetCharacter);
-        return [$HP, $damage] ;
+        return $damage;
     }
 
-    public function criticalHit(){
+    public function criticalHit() : bool {
         $result = rand(1,5);
         if($result == 5){
             return true;
@@ -40,13 +35,11 @@ class Warrior extends Character{
         return false;
     }
 
-    public function hit(Character $targetCharacter, Character $attackingCharacter, $strength){
-        $criticalHit = $this->criticalHit();
-        if($criticalHit){
+    public function giveDamage(Character $targetCharacter){
+        if($this->criticalHit()){
             $targetCharacter->setCriticalHit();
         }
-        [$HP, $damage] = parent::hit($targetCharacter, $attackingCharacter, $strength);
-        return [$HP, $damage];
+        return parent::giveDamage($targetCharacter);
     }
 
 }

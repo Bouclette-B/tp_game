@@ -152,25 +152,42 @@ abstract class Character {
             $this->_malus['freeze']['remainingRounds'] = 0;
     }
 
-    public function hit(Character $targetCharacter, Character $attackingCharacter, $strength) {
-        $malus = $attackingCharacter->malus();
-        $rounds = $malus['freeze']['remainingRounds'];
-        if($rounds != 0){
-            $rounds -= 1;
-            $HP = $targetCharacter->healthPoints();
+    public function hit(Character $targetCharacter, Character $attackingCharacter){
+        if($this->characterCanHit()){
+            return $this->giveDamage($targetCharacter);
+        }else{
             $damage = 0;
-            $attackingCharacter->setFreeze($rounds);
+            $HP = $targetCharacter->_healthPoints;
             return [$HP, $damage];
-        }elseif($rounds == 0){
-                $attackingCharacter->stopFreeze();
         }
-        return $targetCharacter->receiveDamage($strength, $targetCharacter);
     }
 
-    public function receiveDamage($damage, $targetCharacter) {
+    public function characterCanHit() : bool{
+        $rounds = $this->_malus['freeze']['remainingRounds'];
+        if($rounds == 2){
+            $rounds -= 1;
+            $this->setFreeze($rounds);
+            return false;
+        }elseif($rounds == 1){
+            $rounds -= 1;
+            $this->setFreeze($rounds);
+            $this->_malus['freeze']['sentence'] = "Frozen ! Tu ne peux pas attaquer ce tour-ci.";
+            return false;
+        }elseif($rounds == 0){
+            $this->stopFreeze();
+            return true;
+        }
+    }
+
+    public function calculDamage(Character $attackingCharacter) : int {
+        return rand(1, 10) + (2 * $attackingCharacter->strength());
+    }
+
+    public function giveDamage(Character $targetCharacter) {
+        $damage = $this->calculDamage($targetCharacter);
         $malus = $targetCharacter->malus();
         if($malus['criticalHit'] != ""){
-            $damage = $damage*2;
+            $damgage  = $damage * 2;
         }
         $targetCharacter->_healthPoints -= $damage;
         $HP = $targetCharacter->_healthPoints;
@@ -206,6 +223,14 @@ abstract class Character {
 
     public function resetMalus(){
         $this->_malus['criticalHit'] = "";
+    }
+
+    public function flee(){
+        $result = rand(1, 2);
+        if($result == 1){
+            return true;
+        }
+        return false;
     }
 
 }   
